@@ -1,17 +1,17 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 
-from react_project.tools.project_setup import ProjectSetup
-from react_project.tools.context_creation import ContextCreation
-from react_project.tools.component_setup import ComponentSetup
-from react_project.tools.form_creation import FormCreation
-from react_project.tools.project_listing import ProjectListing
+from react_project.tools.project_generator import ProjectGenerator
+from react_project.tools.context_generator import ContextGenerator
+from react_project.tools.component_generator import ComponentGenerator
+from react_project.tools.hook_generator import HookGenerator
 
-project_setup = ProjectSetup()
-context_creation = ContextCreation()
-component_setup = ComponentSetup()
-form_creation = FormCreation()
-project_listing = ProjectListing()
+project_generator = ProjectGenerator()
+context_generator = ContextGenerator()
+component_generator = ComponentGenerator()
+hook_generator = HookGenerator()
+# form_creation = FormCreation()
+# project_listing = ProjectListing()
 
 @CrewBase
 class ReactProjectCrew:
@@ -58,24 +58,25 @@ class ReactProjectCrew:
         )
 
     @task
-    def project_setup_task(self) -> Task:
+    def project_generator_task(self) -> Task:
         return Task(
-            config=self.tasks_config['project_setup_task'],
-            tools=[project_setup],
+            config=self.tasks_config['project_generator_task'],
+            execute=project_generator.create_react_project,
+            verbose=True
         )
 
     @task
     def context_creation_task(self) -> Task:
         return Task(
             config=self.tasks_config['context_creation_task'],
-            tools=[context_creation],
+            tools=[context_generator],
         )
 
     @task
     def component_setup_task(self) -> Task:
         return Task(
             config=self.tasks_config['component_setup_task'],
-            tools=[component_setup],
+            tools=[component_generator],
         )
 
     @task

@@ -1,13 +1,13 @@
 from crewai_tools import BaseTool
 
-class CaptureLeads(BaseTool):
-    name: str = 'CaptureLeads from Servers'
+class ComponentGenerator(BaseTool):
+    name: str = 'Generate Components'
     description: str = (
-        "Capture leads from servers like Instagram or WhatsApp."
+        "Generate components from commands"
     )
 
     def _run(self, *args, **kwargs):
-        # Implement the logic for capturing leads here
+        # Implement the logic
         pass
 
     def create_navbar(self, context_name):
@@ -84,11 +84,11 @@ export default {context_name}Form;
 import React, {{ useContext }} from 'react';
 import {{ {context_name}Context }} from '../context/{context_name}Context';
 
-const {context_name}Projects = () => {{
+const {context_name} = () => {{
   const {{ state }} = useContext({context_name}Context);
 
   if (!state || !state.{context_name.lower()}s) {{
-    return <div>No projects available</div>;
+    return <div>Nothing is available</div>;
   }}
 
   return (
@@ -103,10 +103,10 @@ const {context_name}Projects = () => {{
   );
 }};
 
-export default {context_name}Projects;
+export default {context_name};
         """
 
-        with open(f'src/components/{context_name}Projects.js', 'w') as f:
+        with open(f'src/components/{context_name}.js', 'w') as f:
             f.write(projects_template)
 
-        print(f"Projects component created for {context_name}.")
+        print(f"{context_name} component created.")

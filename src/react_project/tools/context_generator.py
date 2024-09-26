@@ -7,46 +7,67 @@ class ContextGenerator(BaseTool):
     )
 
     def _run(self, *args, **kwargs):
+        # Prompt for context name and create the context
         context_name = self.prompt_context_name()
         self.create_context(context_name)
 
     def prompt_context_name(self):
+        # Prompt for the context name
         context_name = input("Enter the name of the context (e.g., MyContext): ")
         return context_name
 
     def create_context(self, context_name):
+        # Template for the React Context with React Query integration
         template = f"""
-import React, {{ createContext, useState }} from 'react';
+import React, {{ createContext, useMemo }} from 'react';
+import {{ useQuery, useMutation, useQueryClient }} from '@tanstack/react-query';
+import axios from 'axios';
 
 export const {context_name}Context = createContext();
 
-export class {context_name}Provider extends React.Component {{
-  constructor(props) {{
-    super(props);
-    this.state = {{
-      // Initial state values can go here
-    }};
-  }}
+export const {context_name}Provider = ({{ children }}) => {{
 
-  setState = (newState) => {{
-    this.setState(newState);
-  }}
+  const queryClient = useQueryClient();
+  const {{ data, isLoading, refetch }} = useQuery(['{context_name}'], fetch{context_name}Data);
 
-  render() {{
-    return (
-      <{context_name}Context.Provider value={{{
-        state: this.state,
-        setState: this.setState,
-      }}}
-      >
-        {{this.props.children}}
-      </{context_name}Context.Provider>
-    );
-  }}
-}}
+  const destroyMutation = useMutation({{
+    mutationFn: ({{ id }}) => {{
+      if (window.confirm('Are you sure?')) {{
+        return axios.delete(id);
+      }}
+    }},
+    onSuccess: () => {{
+      queryClient.invalidateQueries({{ queryKey: ['{context_name}'] }});
+    }},
+  }});
+
+  const destroy{context_name} = (instance) => {{
+    destroyMutation.mutate({{ id: instance.id }});
+  }};
+
+  const value = useMemo(() => ({{
+    data,
+    isLoading{context_name}: isLoading,
+    refetch{context_name}: refetch,
+    destroy{context_name},
+  }}), [data, isLoading, refetch, destroyMutation]);
+
+  return (
+    <{context_name}Context.Provider value={{ value }}>
+      {{ children }}
+    </{context_name}Context.Provider>
+  );
+}};
+
+const fetch{context_name}Data = async () => {{
+  // Fetch data logic
+  const response = await axios.get('/api/{context_name}');
+  return response.data;
+}};
         """
 
+        # Write the generated context to a file
         with open(f'src/context/{context_name}Context.js', 'w') as f:
             f.write(template)
 
-        print(f"Context '{context_name}' created.")
+        print(f"Context '{context_name}' created successfully.")
